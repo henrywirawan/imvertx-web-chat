@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->  
+    <link rel="icon" type="image/png" href="images/icons/favicon.ico"/>
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="fonts/iconic/css/material-design-iconic-font.min.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+<!--===============================================================================================-->  
+    <link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/animsition/css/animsition.min.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+<!--===============================================================================================-->  
+    <link rel="stylesheet" type="text/css" href="vendor/daterangepicker/daterangepicker.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="css/util.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+<!--===============================================================================================-->
+
+
+
+    <!-- <link rel="stylesheet" href="/css/style.css"> -->
+    <link rel="stylesheet" href="/css/chat.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+</head>
+<body>
+    <div id="Chat">
+        
+        <div id="message">
+            <div style="padding: 5px">
+                <div id="inner-message" 
+                     class="alert" 
+                     :class="alertMessage.type"
+                     transition="expand"
+                     v-if="alert" >
+                    {{ alertMessage.message }} 
+                </div>
+            </div>
+        </div>
+        <chat-box 
+            :online-users="onlineUsers" 
+            :conversation="conversation" 
+            @add="addConversation"
+            @reset="resetNotif"
+            @alert="showAlert"
+            v-if="loggedIn">
+        </chat-box>
+        <div id="Chat__Login" v-else>
+            <form @submit.prevent="login()">
+                <div class="limiter">
+                    <div class="container-login100" style="background-image: url('images/bg-01.jpg');">
+                        <div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
+                            <form class="login100-form validate-form">
+                                <span class="login100-form-title p-b-49">
+                                    Login
+                                </span>
+
+                                <div class="wrap-input100 validate-input m-b-23" data-validate = "Username is reauired">
+                                    <span class="label-input100">Username</span>
+                                    <input class="input100" type="text" name="username" placeholder="Type your username">
+                                    <span class="focus-input100" data-symbol="&#xf206;"></span>
+                                </div>
+                                
+                                <div class="container-login100-form-btn">
+                                    <div class="wrap-login100-form-btn">
+                                        <div class="login100-form-bgbtn"></div>
+                                        <button type="submit" class="login100-form-btn">
+                                            Login
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    
+<!--===============================================================================================-->
+    <script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+    <script src="vendor/animsition/js/animsition.min.js"></script>
+<!--===============================================================================================-->
+    <script src="vendor/bootstrap/js/popper.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+    <script src="vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+    <script src="vendor/daterangepicker/moment.min.js"></script>
+    <script src="vendor/daterangepicker/daterangepicker.js"></script>
+<!--===============================================================================================-->
+    <script src="vendor/countdowntime/countdowntime.js"></script>
+<!--===============================================================================================-->
+    <script src="js/main.js"></script>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.15/dist/vue.js"></script>
+    <script type="text/x-template" id="chat-box">
+        <div class="row">
+            <div class="col-lg-6 col-lg-offset-3">
+                <div id="ChatBox" class="container1 clearfix">
+                    <div class="people-list" id="people-list">
+                        <div class="search text-center" style="border-bottom: 1px #A8A8A8 solid">
+                            <span style="font-size: 30px;">Friend List</span>
+                        </div>
+
+                        <ul class="list">
+                            <li class="clearfix" 
+                                :class="{ 'active': user.username === selected }"
+                                v-for="user in onlineUsers" 
+                                @click="selectConversation(user)">
+                                    <img src="https://www.mycustomer.com/sites/all/modules/custom/sm_pp_user_profile/img/default-user.png" class="avatar" alt="avatar" />
+                                    <div class="about">
+                                        <div class="user-name">
+                                            {{ user.username }} <span class="badge" v-if="user.notif > 0">{{ user.notif }}</span>
+                                        </div>
+                                        <div class="status">
+                                            <i class="fa fa-circle online"></i> online
+                                        </div>
+                                    </div>
+
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="chat">
+                        <!-- <div class="chat-header clearfix">
+                            <img src="https://www.mycustomer.com/sites/all/modules/custom/sm_pp_user_profile/img/default-user.png" class="avatar" alt="avatar" />
+
+                            <div class="chat-about">
+                                <div class="chat-with">Chat with Vincent Porter</div>
+                                <div class="chat-num-messages">already 1 902 messages</div>
+                            </div>
+                            <i class="fa fa-star"></i>
+                        </div> -->
+
+                        <div class="chat-history">
+                            <ul>
+                                <li class="clearfix message row"
+                                v-for="(message, index) in messages"
+                                >
+                                <div class="col-lg-12">
+                                    
+                                    <div class="message-data align-right"
+                                    v-if="username === message.from">
+                                        <span class="message-data-name">{{ message.from }}</span> <i class="fa fa-circle me"></i>
+                                    </div>
+                                    <div class="message-data align-left"
+                                    v-else>
+                                        <span class="message-data-name">{{ message.from }}</span> <i class="fa fa-circle me"></i>
+                                    </div>
+                                    <div class="message other-message float-right" 
+                                    v-if="username === message.from">
+                                        <span class="float-right">{{ message.message }}</span>
+                                        
+                                    </div>
+                                    <div class="message my-message" 
+                                    v-else>
+                                        <span class="float-left">{{ message.message }}</span>
+                                        
+                                    </div>
+                                </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Type here Box -->
+                        <div class="chat-message clearfix">
+                            <form @submit.prevent="sendMessage()">
+                                <textarea name="message-to-send" id="message-to-send" placeholder="Type your message" rows="3" v-model="newMessage"></textarea>
+
+                                <i class="fa fa-file-o"></i> &nbsp;&nbsp;&nbsp;
+                                <i class="fa fa-file-image-o"></i>
+
+                                <button type="submit">Send</button>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script>
+        var socket = new WebSocket("ws://localhost:8999")
+        
+        var Chat = new Vue({
+            el: '#Chat',
+            data: {
+                username: '',
+                loggedIn: false,
+                onlineUsers: [],
+                conversation: [],
+                alert: false,
+                alertMessage: ''
+            },
+            created() {
+                var self = this
+                socket.onmessage = function (ev) {
+                    if (ev.data instanceof Blob) {
+                        var reader = new FileReader()
+                        reader.onload = (function(self) {
+                            return function() {
+                                var json = JSON.parse(reader.result)
+                                self.processJson(json)
+                            }
+                        })(self)
+                        reader.readAsText(ev.data)
+                    }
+                }
+            },
+            methods: {
+                processJson(json) {
+                    var clazz = json['@class']
+                    handlers = [
+                        {
+                            '@class':
+                                'com.desdulianto.learning.imvertx.packet.LoginNotification',
+                            handler: this.loginSuccess
+                        },
+                        {
+                            '@class':
+                                'com.desdulianto.learning.imvertx.packet.OnlineUsers',
+                            handler: this.refreshUserList
+                        },
+                        {
+                            '@class':
+                                'com.desdulianto.learning.imvertx.packet.ConversationMessage',
+                            handler: this.addConversation
+                        },
+                        {
+                            '@class':
+                                'com.desdulianto.learning.imvertx.packet.FailedLoginNotification',
+                            handler: this.failedLogin
+                        },
+                        {
+                            '@class':
+                                'com.desdulianto.learning.imvertx.packet.TextMessage',
+                            handler: this.showAlert
+                        },
+                    ]
+                    var handler = handlers.find(function(x) {return x['@class'] === clazz})
+                    if (handler !== undefined)
+                        handler.handler(json)
+                    else
+                        // buka web developer tool web console
+                        console.log(json)
+                },
+                
+                login() {
+                    var loginMessage = {
+                        '@class': 'com.desdulianto.learning.imvertx.packet.LoginMessage',
+                        username: this.username,
+                        password: ''
+                    }
+                    socket.send(JSON.stringify(loginMessage))
+                    this.loggedIn = true
+                },
+                failedLogin () {
+                    this.loggedIn = false
+                    this.username = ''
+                    this.showAlert({
+                        message: 'Already Online',
+                        type: 'alert-danger'
+                    })
+                },
+                loginSuccess(json) {
+                    var listOnlineUsersMessage = {
+                        '@class': 'com.desdulianto.learning.imvertx.packet.ListOnlineUsersMessage'
+                    }
+                    socket.send(JSON.stringify(listOnlineUsersMessage))
+                },
+                refreshUserList(json) {
+                    json.users.forEach(x => {
+                        var oldData = this.onlineUsers.find(user => user.username === x.username) || { notif: 0 }
+                        x.notif = oldData.notif
+                    })
+                    this.onlineUsers = [...json.users ]
+                },
+                addConversation(message) {
+                    this.conversation.push(message)
+                    if(message.from != this.username)
+                        this.onlineUsers.find(x => x.username === message.from).notif++
+                    // var container = this.$children[0].$el.querySelector(".ChatBox__List")
+                    // container.scrollTop = container.scrollHeight
+                    // var container = this.$children[0].$el.querySelector(".ChatBox__List")
+                    // container.scrollTop = container.scrollHeight
+                },
+                resetNotif(user) {
+                    var user = this.onlineUsers.find(x => x.username === user)
+                    if (user) user.notif = 0
+                },
+                async showAlert (json) {
+                    this.alert = true
+                    this.alertMessage = {
+                        message: json.message,
+                        type: json.type || 'alert-success'
+                    }
+                    var self = this
+                    await setTimeout(function(){
+                        self.alert = false
+                    }, 2000)
+                },
+            }
+        })
+        
+        Vue.component('chat-box', {
+            template: '#chat-box',
+            props: ['onlineUsers', 'conversation'],
+            data() {
+                return {
+                    newMessage: '',
+                    selected: '',
+                }
+            },
+            methods: {
+                sendMessage () {
+                    if (this.selected === '') 
+                        return this.$emit('alert', {
+                            message: 'Select your friend to start chat',
+                            type: 'alert-danger'
+                        })
+                    var conversationMessage = {
+                        '@class': 'com.desdulianto.learning.imvertx.packet.ConversationMessage',
+                        message: this.newMessage,
+                        from: this.username,
+                        to: this.selected
+                    }
+                    this.$emit('add', conversationMessage)
+                    socket.send(JSON.stringify(conversationMessage))
+                    this.newMessage = ''
+                },
+                selectConversation (user) {
+                    this.selected = user.username
+                    this.$emit('reset', this.selected)
+                }
+            },
+            watch: {
+                onlineUsers: {
+                    handler: function (val, oldVal) { 
+                        this.$emit('reset', this.selected) 
+                    },
+                    deep: true
+                }
+            },
+            computed: {
+                username () {
+                    return Chat.username
+                },
+                messages () {
+                    return this.conversation.filter(x => {
+                        return (x.from === this.username && x.to === this.selected) ||
+                        (x.from === this.selected && x.to === this.username) 
+                    })
+                }
+            }
+        })
+
+    </script>
+</body>
+</html>
